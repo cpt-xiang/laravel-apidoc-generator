@@ -253,9 +253,15 @@ abstract class AbstractGenerator
         $source = file($filename);
         $body = implode('', array_slice($source, $start_line, $length));
 
-        preg_match('/(validate\(\[)(.*?)(\]\))/s', $body, $result);
+        preg_match('/(validate\(\[)(.*?)(\]\);)/s', $body, $result);
         if ($result) {
-            $stringArr = preg_split("/'(\s|),+/s", $result[2], -1, PREG_SPLIT_NO_EMPTY);
+            if(str_contains($result[2], 'implode')){
+//                $tmp = preg_replace('/\'.implode(.*)\[(.*)\]\)/s', 'OrgRepo::org_type_agent, OrgRepo::org_type_school, OrgRepo::org_type_realty'."'", $result[2]);
+                $tmp = preg_replace('/\'.implode(.*)\[(.*)\]\)/s', "$2"."'", $result[2]);
+                $stringArr = preg_split('/[\'"](\s|),+/s', $tmp, -1, PREG_SPLIT_NO_EMPTY);
+            } else
+                $stringArr = preg_split('/[\'"](\s|),+/s', $result[2], -1, PREG_SPLIT_NO_EMPTY);
+
             foreach ($stringArr as $line) {
                 if (strpos($line, '=>') !== false) {
                     $lineRule = explode('=>', $line);
